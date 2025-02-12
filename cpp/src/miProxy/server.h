@@ -13,8 +13,8 @@
 
 class proxyServer {
 public:
-    // Constructors, Creating a proxy server listening on specific ports
-    proxyServer();
+    // Constructor needs port number
+    proxyServer(int port);
 
     // Destructor
     ~proxyServer();
@@ -22,6 +22,8 @@ public:
     
     void run();
 private:
+    int port;
+    int server_socket;
     void parsing_http_header();
 
     double calculateThroughput();
@@ -31,7 +33,5 @@ private:
     void getVidSegmentRequest();
 
     void postACKRecieved();   
-    
-    
-
+    // static int make_server_sockaddr(struct sockaddr_in *addr, int port);
 };

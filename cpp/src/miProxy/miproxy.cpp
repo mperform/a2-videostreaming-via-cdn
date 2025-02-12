@@ -28,7 +28,8 @@ int main(int argc, char* argv[]) {
         ("l,listen-port", "Port number", cxxopts::value<int>())
         ("h,hostname", "Server hostname", cxxopts::value<std::string>())
         ("p,port", "Port number", cxxopts::value<int>())
-        ("t,time", "Duration in seconds", cxxopts::value<double>());
+        ("a,alpha", "EWMA coefficient", cxxopts::value<double>())
+        ;
 
     auto result = options.parse(argc, argv);
 
@@ -38,14 +39,21 @@ int main(int argc, char* argv[]) {
     }   
 
 
-    // Create and start server
-    proxyServer server;
+    // Create and start server and pass in the arguments
+    int listen_port = result["listen-port"].as<int>();
+    std::string hostname = result["hostname"].as<std::string>();
+    int port = result["port"].as<int>();
+
+    proxyServer server(listen_port);
     server.run();
 
     // // Setup finished
     // spdlog::info("miProxy started");
 
-    // // While loop, wait for requests
+    // While loop, wait for requests
+    while (true) {
+
+    }
     // while (true) {
     //     // select()
 

@@ -1,14 +1,15 @@
-# Set the MIPROXY_SOURCES variable to the list of all source files in the current directory
+# Set the source files for miProxy
 set(
     MIPROXY_SOURCES 
     miproxy.cpp
+    server.cpp
 )
 
-# Tell CMake to create an executable named 'miProxy' from the source files
+# Create the miProxy executable
 add_executable(miProxy ${MIPROXY_SOURCES})
 
-# Ensure that the cxxopts and common libraries are linked to the miProxy executable
-target_link_libraries(miProxy PRIVATE cxxopts::cxxopts common spdlog::spdlog pugixml::pugixml Boost::regex)
+# Link necessary libraries
+target_link_libraries(miProxy PRIVATE cxxopts common spdlog::spdlog pugixml::pugixml Boost::regex)
 
-# Include the common directory for headers (e.g. LoadBalancerProtocol.h)
-target_include_directories(miProxy PRIVATE ${PROJECT_SOURCE_DIR}/common)
+# Include directories
+target_include_directories(miProxy PRIVATE ${PROJECT_SOURCE_DIR}/common ${PROJECT_SOURCE_DIR}/spdlog)
