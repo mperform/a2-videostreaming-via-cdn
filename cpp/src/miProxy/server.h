@@ -9,6 +9,10 @@
  * Created: 02-06-2025
  *
  ******************************************************************************/
+
+#include <string>
+#include <iostream>
+#include <map>
 #pragma once
 
 class proxyServer {
@@ -24,7 +28,7 @@ public:
 private:
     int port;
     int server_socket;
-    void parsing_http_header();
+    std::string parsing_http_header(int clientSocket, std::map<std::string, std::string>& headers, std::string& body);
 
     double calculateThroughput();
 
