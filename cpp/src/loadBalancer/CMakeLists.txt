@@ -2,6 +2,7 @@
 set(
     LOADBALANCER_SOURCES 
     loadBalancer.cpp
+    balancer.cpp
 )
 
 # Tell CMake to create an executable named 'loadBalancer' from the source files
