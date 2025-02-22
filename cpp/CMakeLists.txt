@@ -53,3 +53,6 @@ find_package(Boost REQUIRED COMPONENTS regex)
 
 # Recurse through the subdirectories
 add_subdirectory(src)
+
+add_library(utils STATIC src/loadBalancer/utils.cpp)
+target_include_directories(utils PUBLIC ${CMAKE_SOURCE_DIR}/src/loadBalancer)
