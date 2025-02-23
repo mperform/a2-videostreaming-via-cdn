@@ -28,6 +28,8 @@ public:
 private:
     int port;
     int server_socket;
+    std::unordered_map<int, sockaddr_in> client_sockets;  // Track connected clients
+
     std::string parsing_http_header(int clientSocket, std::map<std::string, std::string>& headers, std::string& body);
 
     double calculateThroughput();

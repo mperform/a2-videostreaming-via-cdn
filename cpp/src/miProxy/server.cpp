@@ -65,11 +65,81 @@ void proxyServer::run() {
         spdlog::error("Error: Failed to create socket");
         return;
     }
+    // allow reuse of the port
+    int opt = 1;
+    setsockopt(server_socket, SOL_SOCKET, SO_REUSEADDR, &opt, sizeof(opt));
+
+
     struct sockaddr_in server_addr;
     make_server_sockaddr(&server_addr, this->port);
     bind(server_socket, (struct sockaddr *)&server_addr, sizeof(server_addr));
 
     spdlog::info("miProxy started");
+
+    // implement select() here
+
+    // socket descriptors
+    fd_set master_set, read_fds;
+    FD_ZERO(&master_set);
+    FD_SET(server_socket, &master_set); // add the listening socket to the master set
+    int max_fd = server_socket; // track max socket descriptor
+
+    while (true) {
+        // copy the master set for select() operation
+        read_fds = master_set;
+
+        int activity = select(max_fd + 1, &read_fds, nullptr, nullptr, nullptr);
+
+        if (activity < 0 && errno != EINTR) {
+            spdlog::error("Error: select() failed");
+            break;
+        }
+
+        if (FD_ISSET(server_socket, &read_fds)) {
+            sockaddr_in client_addr;
+            socklen_t addr_len = sizeof(client_addr);
+            int client_sock = accept(server_socket, (struct sockaddr*)&client_addr, &addr_len);
+            if (client_sock < 0) {
+                spdlog::error("Error: accept() failed");
+                continue;
+            }
+
+            // Add new client socket to the master set
+            FD_SET(client_sock, &master_set);
+            client_sockets[client_sock] = client_addr; // Store client info
+            if (client_sock > max_fd) {
+                max_fd = client_sock; // Update max file descriptor
+            }
+
+        }
+        // Handle existing client requests
+        for (auto it = client_sockets.begin(); it != client_sockets.end(); ) {
+            int client_sock = it->first;
+
+            if (FD_ISSET(client_sock, &read_fds)) {
+                std::map<std::string, std::string> headers;
+                std::string body;
+                std::string requestLine = parsing_http_header(client_sock, headers, body);
+
+                if (requestLine.empty()) {
+                    spdlog::info("Client {} disconnected", client_sock);
+                    close(client_sock);
+                    FD_CLR(client_sock, &master_set);
+                    it = client_sockets.erase(it);
+                    continue;
+                }
+
+                spdlog::info("Received HTTP request: {}", requestLine);
+
+                // TODO: Forward request to video server
+                std::string response = "HTTP/1.1 200 OK\r\nContent-Length: 13\r\n\r\nHello, Proxy!";
+                send(client_sock, response.c_str(), response.size(), 0);
+            }
+
+            ++it;
+        }
+
+    }
 }
 
 std::string proxyServer::parsing_http_header(int clientSocket, std::map<std::string, std::string>& headers, std::string& body) {
